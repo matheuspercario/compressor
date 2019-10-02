@@ -3,8 +3,12 @@
 /*
  *		Disciplina ST562 - Estrutura de Arquivos
  *		
+ * 		Projeto - Compressor
  *
- *
+ *		Desenvolvedores:
+ *			Arthur Guedes
+ *			Kevin Barrios
+ *			Matheus Bruder
  *
  *
  */

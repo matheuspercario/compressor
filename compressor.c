@@ -23,6 +23,11 @@
 //-----------------------------------------------------------------------------
 	void compressao(char * argumento);
 	void descompressao(char * argumento);
+	void abertura(char * argumento, char * action);
+	void ler_arq();
+	void grava_arq();
+
+
 
 	
 //-----------------------------------------------------------------------------

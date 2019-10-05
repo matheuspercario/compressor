@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*
  *		Disciplina ST562 - Estrutura de Arquivos
@@ -15,7 +16,8 @@
  *
  */
 
-	FILE * arq_entrada, arq_saida;
+	FILE * arq_entrada;
+	FILE * arq_saida;
 	char palavra[4096];
 
 //-----------------------------------------------------------------------------
@@ -25,7 +27,7 @@
 	void descompressao(char * argumento);
 	void abertura(char * argumento, char * action);
 	void ler_arq();
-	void grava_arq();
+	void gravar_arq();
 
 
 
@@ -45,7 +47,7 @@ int main (int argc, char * argv[]) {
 	}
 	else if(strcmp(argv[1], comprimir) == 0) {
 		// Chamada funcao de compressao
-		abertura(argv[1], ".cmp");
+		abertura(argv[2], ".cmp.txt");
 		while(!feof(arq_entrada)) {
 			ler_arq();
 			compressao(argv[2]);
@@ -81,10 +83,11 @@ void abertura(char * argumento, char * action) {
 
 void ler_arq() {
 	fread(&palavra, sizeof(palavra), 1, arq_entrada);
+	printf("%s", palavra);
 }
 
-void grava_arq() {
-	fwrite(&palavra, sizeof(palavra), 1, arq_saida);
+void gravar_arq() {
+	fprintf(arq_saida,"%s",palavra);
 }
 
 
@@ -92,7 +95,7 @@ void grava_arq() {
 
 void compressao(char * argumento) {
 	// Teste
-	printf("%s\n", argumento);
+	//printf("%s\n", argumento);
 	printf("Funcao Compressao\n");
 }
 

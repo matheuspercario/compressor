@@ -21,44 +21,45 @@
 
 	FILE * arq_entrada;
 	FILE * arq_saida;
-	int j= 0;
+	map <int, string> palavras;
+	int flag = 0;
 
 
 //-----------------------------------------------------------------------------
 //	Prototipo das Funcoes
 //-----------------------------------------------------------------------------
-	map <int, string> palavras;
+	
 	void compressao();
 	void descompressao(char * argumento);
 	void abertura(char * argumento, char * action);
 	void ler_arq();
 	void gravar_arq();
 	void cabecalho();
+
 //-----------------------------------------------------------------------------
 //	Funcao Principal - MAIN
-//-----------------------------------------------------------------------------7
-
+//-----------------------------------------------------------------------------
 int main (int argc, char * argv[]){	
 
 	// Variaveis de controle
 	string comprimir= "-c";
-	string descompressao = "-d";
+	string descomprimir = "-d";
 
 	if(argc != 3) {
 		// Nao possui numero minimo de argumentos
 		printf("Faltando argumentos\n");
 	}
-	else if(argv[1]== comprimir) {
+	else if(argv[1] == comprimir){
 		// Chamada funcao de compressao
 		abertura(argv[2], ".cmp");
-		while(!feof(arq_entrada)) {
+		while(!feof(arq_entrada)){
 			ler_arq();
 			cabecalho();
 			compressao();	
 			gravar_arq();
 		}
 	} 
-	else if(argv[1]== descompressao) {
+	else if(argv[1] == descomprimir){
 		// Chamada funcao de descompressao
 		abertura(argv[1], "");
 		//descompressao(argv[2]);
@@ -72,59 +73,60 @@ return 0;
 //-----------------------------------------------------------------------------
 //	Funcoes - Compressao e Descompressao  (Prontas)
 //-----------------------------------------------------------------------------	
-void abertura(char * argumento, char * action) {
+void abertura(char * argumento, char * action){
 	arq_entrada = fopen(argumento, "r");
 	if (arq_entrada == NULL)
     {
-		printf("%s", argumento);
-        printf("Cannot open file!\n");
+        cout << "arq_entrada = Cannot open file!" << endl;
         exit(0);
     }
 	strcat(argumento, action);
 	arq_saida = fopen(argumento, "w");
+	if (arq_saida == NULL)
+    {
+        cout << "arq_saida = Cannot open file!" << endl;
+        exit(0);
+    }
 }
 
-void ler_arq() {
+void ler_arq(){
 	char palavra_aux[50];
-	int tam_aux=0;
-	int tam_string = 0 ; 
+	int tam_aux = 0;
+	int tam_string = 0; 
 	while(tam_aux < 4096 && !feof(arq_entrada)){
-		fscanf(arq_entrada,"%s",&palavra_aux);
-		tam_string =  strlen(palavra_aux);	
-			palavras[j]= palavra_aux;
-				j++;
+		fscanf(arq_entrada, "%s", &palavra_aux);
+		cout << palavra_aux;
+		tam_string = strlen(palavra_aux);	
+		palavras[flag] = palavra_aux;
+		flag++;
 	}
 }
 
-void cabecalho (){
+void cabecalho(){
 	int tam;
 
 	for(int i=0; i<palavras.size(); i++){
 		for(int j=0; j<palavras.size(); j++){
 			int tam_aux = palavras[i].length();
-			if( tam_aux <= 3){
-				
+			if(tam_aux <= 3){
 				break;
 			}
-			if(palavras[i] == palavras[j]  ){
-				if(j>i || j==i ){
+			if(palavras[i] == palavras[j]){
+				if(j>i || j==i){
 				tam++;
-			
 				}
 				break;
 			}
 		}
 	}
-	printf("(0) (%d)", tam);
-
-	
+	cout << "[0 " << tam << "]";	
 }
 
 //-----------------------------------------------------------------------------
 //	Funcoes - Compressao e Descompressao
 //-----------------------------------------------------------------------------	
 void gravar_arq(){
-	int i=0;
+	int i = 0;
 	
 	//fprintf(arq_saida,"%s",palavra);
 	//while(matriz_dados[50][i] !=NULL){
@@ -133,51 +135,53 @@ void gravar_arq(){
 }
 
 void compressao(){
-
+	string palavra_aux;
 	for(int i=0; i<palavras.size(); i++){
 		for(int j=0; j<palavras.size(); j++){
 			int tam_aux = palavras[i].length();
-			if( tam_aux <= 3){
-				
+			if(tam_aux <= 3){
 				break;
 			}
-			if(palavras[i] == palavras[j]  ){
-				if(j>i || j==i ){
-			
-				cout << palavras[i] <<",";
+			if(palavras[i] == palavras[j]){
+				if(j>i || j==i){
+					palavra_aux = palavras[i];
+						if(palavra_aux[tam_aux - 1] != ',' && palavra_aux[tam_aux - 1] != '.' && palavra_aux[tam_aux - 1] != '?' && palavra_aux[tam_aux - 1] != '!' 
+															&& palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':')
+						{
+							cout << palavras[i] << ",";
+						} else {
+							palavras[i] = "";
+							for(int k = 0; k < tam_aux - 1; k++)
+							{
+								palavras[i] += palavra_aux[k];
+							}
+							cout << palavras[i] << ",";
+						}
 				}
 				break;
 			}
 		}
 	}
 
-
+	int k = 0;
 	for(int i=0; i<palavras.size(); i++){
 		for(int j=0; j<palavras.size(); j++){
 			int tam_aux = palavras[i].length();
-			if( tam_aux <= 3){
-				cout << "" <<palavras[i];
+			if(tam_aux <= 3){
+				cout << "" << palavras[i];
 				break;
 			}
 			if(palavras[i] == palavras[j]){	
-				printf("(255)(%d)",j);
+				cout << "[255 " << k << "]";
+				k++;
 				break;
 			}
-
 		}
-
-
 	}
-	
-
 }
 
-void descompressao(char * argumento) {
+void descompressao(char * argumento){
 	// Teste
 	printf("%s\n", argumento);
 	printf("Funcao Descompressao\n");
 }
-
-
-
-

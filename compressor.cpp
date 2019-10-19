@@ -29,7 +29,7 @@ map < int, string > palavras_certas;
 map < int, string > palavras_corretas;
 map < int, string > ::iterator pos;
 int contador = 0;
-
+int existe=0;
 //-----------------------------------------------------------------------------
 //	Prototipo das Funcoes
 //-----------------------------------------------------------------------------
@@ -94,18 +94,62 @@ void abertura(char * argumento, char * action) {
 }
 
 void ler_arq() {
-    char palavra_aux[50];
-    int tam_aux = 0;
-    while (tam_aux < 4096 && !feof(arq_entrada)) {
-        fscanf(arq_entrada, "%s", & palavra_aux);
-		
+    char palavra_original[50];
+    int tam_aux1 = 0;
+    
+    while (tam_aux1 < 4096 && !feof(arq_entrada)) {
+        fscanf(arq_entrada, "%s", &palavra_original);
+		string palavra_aux = palavra_original;
+        string palavra_aux1 = palavra_original;
+
+            int tam_aux = palavra_aux.size()-1;
+              
+    switch(palavra_aux[tam_aux]){
+    case ',':
         palavras[contador] = palavra_aux;
         contador++;
+        palavras[contador] = ", ";
+        contador++;
+        break;
+    case '.':
+        palavras[contador] = palavra_aux;
+        contador++;
+        palavras[contador] = ". ";
+        contador++;
+        break;
+    case '!':
+        palavras[contador] = palavra_aux;
+        contador++;
+        palavras[contador] = "! ";
+        contador++;
+        break;
+    case ';':
+        palavras[contador] = palavra_aux;
+        contador++;
+        palavras[contador] = ";";
+        contador++;
+        break;
+    case ':':
+        palavras[contador] = palavra_aux;
+        contador++;
+        palavras[contador] = ":";
+        contador++;
+        break;
+    case '?':
+        palavras[contador] = palavra_aux;
+        contador++;
+        palavras[contador] = "?";
+        contador++;
+        break;
+    default:    
+        palavras[contador] = palavra_aux;
+        contador++;
+}
     }
 }
 
 void cabecalho() {
-      cout << "[0 " << palavras_corretas.size() << "]";
+      cout << "(0" << palavras_corretas.size() << ")";
 }
 
 //-----------------------------------------------------------------------------
@@ -145,7 +189,13 @@ void compressao() {
                         for (k = 0; k < tam_aux - 1; k++) {
                             palavras[j] += palavra_aux[k];
                         }
-                        palavras_certas[i] = palavras[j];
+                        
+                        for(int k =0; k<palavras_certas.size(); k++){
+                                if(palavras_certas[k] == palavras[j])
+                                    existe=1;
+                        }
+                              if(existe ==0)
+                                    palavras_certas[i] = palavras[j];
 						//palavras[j] = ", ";
                     }
 
@@ -190,4 +240,6 @@ void print_testes() {
             }
         }
     }
+
+
 }

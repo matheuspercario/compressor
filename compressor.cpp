@@ -28,7 +28,7 @@ map < int, string > palavras;
 map < int, string > palavras_certas;
 map < int, string > palavras_corretas;
 map < int, string > ::iterator pos;
-int flag = 0;
+int contador = 0;
 
 //-----------------------------------------------------------------------------
 //	Prototipo das Funcoes
@@ -59,8 +59,9 @@ int main(int argc, char * argv[]) {
         abertura(argv[2], ".cmp");
         while (!feof(arq_entrada)) {
             ler_arq();
-            cabecalho();
+            
             compressao();
+			cabecalho(); //JA IMPRIME
             gravar_arq();
             print_testes();
         }
@@ -95,33 +96,16 @@ void abertura(char * argumento, char * action) {
 void ler_arq() {
     char palavra_aux[50];
     int tam_aux = 0;
-    int tam_string = 0;
     while (tam_aux < 4096 && !feof(arq_entrada)) {
         fscanf(arq_entrada, "%s", & palavra_aux);
-        //cout << palavra_aux;
-        tam_string = strlen(palavra_aux);
-        palavras[flag] = palavra_aux;
-        flag++;
+		
+        palavras[contador] = palavra_aux;
+        contador++;
     }
 }
 
 void cabecalho() {
-    int tam;
-    for (int i = 0; i < palavras.size(); i++) {
-        for (int j = 0; j < palavras.size(); j++) {
-            int tam_aux = palavras[i].length();
-            if (tam_aux <= 3) {
-                break;
-            }
-            if (palavras[i] == palavras[j]) {
-                if (j > i || j == i) {
-                    tam++;
-                }
-                break;
-            }
-        }
-    }
-    //	cout << "[0 " << tam << "]";	
+      cout << "[0 " << palavras_corretas.size() << "]";
 }
 
 //-----------------------------------------------------------------------------
@@ -162,9 +146,10 @@ void compressao() {
                             palavras[j] += palavra_aux[k];
                         }
                         palavras_certas[i] = palavras[j];
+						//palavras[j] = ", ";
                     }
-                }
 
+                }
                 break;
             }
         }
@@ -176,14 +161,24 @@ void compressao() {
             aux++;
         }
     }
-    cout << "[0 " << palavras_corretas.size() << "]";
+}
+
+void descompressao(char * argumento) {
+    printf("%s\n", argumento);
+    printf("Funcao Descompressao\n");
+}
+
+void print_testes() {
     for (int i = 0; i < palavras_corretas.size(); i++) //PRINTA SÓ AS PALAVRAS CORRETAS
-        cout << palavras_corretas[i] << ",";
+    cout << palavras_corretas[i] << ",";
     int flag = 0;
     for (int j = 0; j < palavras.size(); j++) {
         flag = 0;
         for (int i = 0; i < palavras_corretas.size(); i++) {
             int tam_aux = palavras[j].length();
+			if(flag ==1) {
+				break;
+			}
             if (tam_aux <= 3 && flag == 0) {
                 flag = 1;
                 cout << "" << palavras[j];
@@ -195,22 +190,4 @@ void compressao() {
             }
         }
     }
-}
-
-void descompressao(char * argumento) {
-    printf("%s\n", argumento);
-    printf("Funcao Descompressao\n");
-}
-
-void print_testes() {
-    //	cout << "\n IMPRIMIR PALAVRAS_CERTAS \n" ;
-    //	for(int i=0; i<palavras_certas.size(); i++)
-    //			cout << " " << palavras_certas[i] << " " << i;
-    //		
-    //	cout << "\n" << "palavras corretas \n";
-    //	for(int i=0; i<palavras_corretas.size(); i++)
-    //			cout << " " << palavras_corretas[i] << " " << i ;
-    //	
-    //
-    //	cout << "\n" << palavras_corretas.size() ;
 }

@@ -125,7 +125,7 @@ void cabecalho(){
 			}
 		}
 	}
-	cout << "[0 " << tam << "]";	
+//	cout << "[0 " << tam << "]";	
 }
 
 //-----------------------------------------------------------------------------
@@ -180,13 +180,12 @@ void compressao(){
 			aux++;
 		}
 	}
-
-	for(int i = 0; i < palavras_corretas.size(); i++) //PRINTA SÓ AS PALAVRAS CORRETAS
+	cout << "[0 " << palavras_corretas.size() << "]" ;
+ 	for(int i = 0; i < palavras_corretas.size(); i++) //PRINTA SÓ AS PALAVRAS CORRETAS
 	cout << palavras_corretas[i] << ",";
 	int flag=0;
    for(int j = 0; j<palavras.size(); j++){
 	   flag=0;
-	
         for(int i=0; i<palavras_corretas.size(); i++){
 			int tam_aux = palavras[j].length();
 			if(tam_aux <= 3 && flag==0){

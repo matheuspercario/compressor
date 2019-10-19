@@ -25,6 +25,7 @@
 	map <int, string> palavras;
 	map <int, string> palavras_certas;
 	map <int, string> palavras_corretas;
+	map<int, string>::iterator pos;
 	int flag = 0;
 
 
@@ -142,6 +143,7 @@ void gravar_arq(){
 void compressao(){
 	string palavra_aux;
 	for(int i=0; i<palavras.size(); i++){
+		
 		for(int j=0; j<palavras.size(); j++){
 			int tam_aux = palavras[i].length();
 			if(tam_aux <= 3){
@@ -187,18 +189,19 @@ void compressao(){
 			aux++;
 		}
 	}
+	int flag=0;
+   for(int j = 0; j<palavras.size(); j++){
+	   flag=0;
+        for(int i=0; i<palavras_corretas.size(); i++){
+            if(palavras_corretas[i] == palavras [j] && palavras_corretas[i] != palavras[j+1] && flag==0){
+				flag=1;
+				pos = palavras_corretas.find(i);
+                cout << "[255 " << pos->first  << "]";
+			}
+				
+    }
 
-	for(int i=0; i<palavras_corretas.size(); i++){
-		for(int j=0; j<palavras.size(); j++){
-			int tam_aux = palavras[j].length();
-			if(tam_aux <= 3){
-				cout << "" << palavras[j];
-			}
-			if(palavras_corretas[i] == palavras[j]){
-				cout << "[255 " << i  << "]";
-			}
-		}
-	}
+}
 }
 
 void descompressao(char * argumento){

@@ -1,1 +1,23 @@
-Joao comprou comprou banana e comprou
+arthur banana arthur banana acerola
+
+
+
+	for(int i=0; i<palavras_corretas.size(); i++){
+		for(int j=0; j<palavras.size(); j++){
+			int tam_aux = palavras[j].length();
+			if(tam_aux <= 3){
+				cout << "" << palavras[j];
+			}
+			if(palavras_corretas[i] == palavras[j]){
+				cout << "[255 " << i  << "]";
+			}
+		}
+	}
+
+
+    for(int i = 0; i<palavras_corretas.size(); i++){
+        for(int j=0; j<palavras.size(); j++){
+            if(palavras_corretas[i] == palavras [j])
+                cout << "[255 " << i  << "]";
+                break
+    }

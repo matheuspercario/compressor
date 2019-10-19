@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <map>
 #include <string>
+#include <bits/stdc++.h> 
 	using namespace std;	
 /*
  *		Disciplina ST562 - Estrutura de Arquivos
@@ -22,6 +23,8 @@
 	FILE * arq_entrada;
 	FILE * arq_saida;
 	map <int, string> palavras;
+	map <int, string> palavras_certas;
+	map <int, string> palavras_corretas;
 	int flag = 0;
 
 
@@ -35,6 +38,7 @@
 	void ler_arq();
 	void gravar_arq();
 	void cabecalho();
+	void print_testes();
 
 //-----------------------------------------------------------------------------
 //	Funcao Principal - MAIN
@@ -57,6 +61,7 @@ int main (int argc, char * argv[]){
 			cabecalho();
 			compressao();	
 			gravar_arq();
+			print_testes();
 		}
 	} 
 	else if(argv[1] == descomprimir){
@@ -95,7 +100,7 @@ void ler_arq(){
 	int tam_string = 0; 
 	while(tam_aux < 4096 && !feof(arq_entrada)){
 		fscanf(arq_entrada, "%s", &palavra_aux);
-		cout << palavra_aux;
+		//cout << palavra_aux;
 		tam_string = strlen(palavra_aux);	
 		palavras[flag] = palavra_aux;
 		flag++;
@@ -143,45 +148,76 @@ void compressao(){
 				break;
 			}
 			if(palavras[i] == palavras[j]){
+	//ADICIONAR O IF QUE FOI RETIRADO
 				if(j>i || j==i){
-					palavra_aux = palavras[i];
-						if(palavra_aux[tam_aux - 1] != ',' && palavra_aux[tam_aux - 1] != '.' && palavra_aux[tam_aux - 1] != '?' && palavra_aux[tam_aux - 1] != '!' 
-															&& palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':')
-						{
-							cout << palavras[i] << ",";
-						} else {
-							palavras[i] = "";
-							for(int k = 0; k < tam_aux - 1; k++)
-							{
-								palavras[i] += palavra_aux[k];
+						palavra_aux = palavras[i];
+						
+							if(palavra_aux[tam_aux - 1] != ',' && palavra_aux[tam_aux - 1] != '.' && palavra_aux[tam_aux - 1] != '?' && palavra_aux[tam_aux - 1] != '!' 
+																&& palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':')
+							{//normal
+								palavras_certas[i] = palavras[j];
+								cout << palavras[i] << ",";
+							} else {
+								palavras[i] = "";
+								for(int k = 0; k < tam_aux - 1; k++)
+								{
+									palavras[i] += palavra_aux[k];
+								}
+							
+								cout << palavras[i] << ",";
+														
 							}
-							cout << palavras[i] << ",";
-						}
-				}
+							
+					
+					}
+
+
+
+// ADICIONAR O IF QUE	
+				
 				break;
 			}
 		}
 	}
+	int aux=0;
+	for(int i = 0; i < palavras_certas.size(); i++){
+		if(palavras_certas[i].length() > 3){
+			
+			palavras_corretas[aux] = palavras_certas[i];
+			aux++;
+		}
+	}
 
-	int k = 0;
-	for(int i=0; i<palavras.size(); i++){
+	for(int i=0; i<palavras_corretas.size(); i++){
 		for(int j=0; j<palavras.size(); j++){
-			int tam_aux = palavras[i].length();
+			int tam_aux = palavras[j].length();
 			if(tam_aux <= 3){
-				cout << "" << palavras[i];
-				break;
+				cout << "" << palavras[j];
 			}
-			if(palavras[i] == palavras[j]){	
-				cout << "[255 " << k << "]";
-				k++;
-				break;
+			if(palavras_corretas[i] == palavras[j]){
+				cout << "[255 " << i  << "]";
 			}
 		}
 	}
 }
 
 void descompressao(char * argumento){
-	// Teste
+
+
 	printf("%s\n", argumento);
 	printf("Funcao Descompressao\n");
+}
+
+void print_testes(){
+	
+//	cout << "\n IMPRIMIR PALAVRAS_CERTAS \n" ;
+//	for(int i=0; i<palavras_certas.size(); i++)
+//			cout << " " << palavras_certas[i] << " " << i;
+//		
+//	cout << "\n" << "palavras corretas \n";
+//	for(int i=0; i<palavras_corretas.size(); i++)
+//			cout << " " << palavras_corretas[i] << " " << i ;
+//	
+//
+//	cout << "\n" << palavras_corretas.size() ;
 }

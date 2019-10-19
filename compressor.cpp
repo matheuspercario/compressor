@@ -150,7 +150,6 @@ void compressao(){
 				break;
 			}
 			if(palavras[i] == palavras[j]){
-	//ADICIONAR O IF QUE FOI RETIRADO
 				if(j>i || j==i){
 						palavra_aux = palavras[i];
 						
@@ -158,26 +157,18 @@ void compressao(){
 																&& palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':')
 							{//normal
 								palavras_certas[i] = palavras[j];
-								cout << palavras[i] << ",";
+							
 							} else {
 								palavras[i] = "";
 								for(int k = 0; k < tam_aux - 1; k++)
 								{
 									palavras[i] += palavra_aux[k];
-								}
-							
-								cout << palavras[i] << ",";
-														
+								}												
 							}
 							
 					
 					}
-
-
-
-// ADICIONAR O IF QUE	
-				
-				break;
+			break;
 			}
 		}
 	}
@@ -189,11 +180,20 @@ void compressao(){
 			aux++;
 		}
 	}
+
+	for(int i = 0; i < palavras_corretas.size(); i++) //PRINTA SÓ AS PALAVRAS CORRETAS
+	cout << palavras_corretas[i] << ",";
 	int flag=0;
    for(int j = 0; j<palavras.size(); j++){
 	   flag=0;
+	
         for(int i=0; i<palavras_corretas.size(); i++){
-            if(palavras_corretas[i] == palavras [j] && palavras_corretas[i] != palavras[j+1] && flag==0){
+			int tam_aux = palavras[j].length();
+			if(tam_aux <= 3 && flag==0){
+				flag=1;
+				cout << "" << palavras[j];
+			} 
+            if(palavras_corretas[i] == palavras [j] && flag==0){
 				flag=1;
 				pos = palavras_corretas.find(i);
                 cout << "[255 " << pos->first  << "]";

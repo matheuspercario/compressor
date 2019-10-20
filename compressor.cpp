@@ -28,8 +28,9 @@ map < int, string > palavras;
 map < int, string > palavras_certas;
 map < int, string > palavras_corretas;
 map < int, string > ::iterator pos;
+
 int contador = 0;
-int existe=0;
+int existe = 0;
 //-----------------------------------------------------------------------------
 //	Prototipo das Funcoes
 //-----------------------------------------------------------------------------
@@ -40,7 +41,9 @@ void abertura(char * argumento, char * action);
 void ler_arq();
 void gravar_arq();
 void cabecalho();
-void print_testes();
+void mostra_tela();
+
+void ler_arq_comprimido();
 
 //-----------------------------------------------------------------------------
 //	Funcao Principal - MAIN
@@ -63,7 +66,9 @@ int main(int argc, char * argv[]) {
             compressao();
 			cabecalho(); //JA IMPRIME
             gravar_arq();
-            print_testes();
+            mostra_tela();
+
+            ler_arq_comprimido();
         }
     } else if (argv[1] == descomprimir) {
         // Chamada funcao de descompressao
@@ -85,8 +90,8 @@ void abertura(char * argumento, char * action) {
         cout << "arq_entrada = Cannot open file!" << endl;
         exit(0);
     }
-    strcat(argumento, action);
-    arq_saida = fopen(argumento, "w");
+    //strcat(argumento, action);
+    arq_saida = fopen("textoCOMPRIMIDO.bin", "wb");
     if (arq_saida == NULL) {
         cout << "arq_saida = Cannot open file!" << endl;
         exit(0);
@@ -97,71 +102,120 @@ void ler_arq() {
     char palavra_original[50];
     int tam_aux1 = 0;
     
-    while (tam_aux1 < 4096 && !feof(arq_entrada)) {
+    while ((tam_aux1 < 4096) && (!feof(arq_entrada))) {
         fscanf(arq_entrada, "%s", &palavra_original);
 		string palavra_aux = palavra_original;
         string palavra_aux1 = palavra_original;
 
-            int tam_aux = palavra_aux.size()-1;
+        int tam_aux = palavra_aux.size() - 1;
+        //cout << palavra_aux << endl;
+        //cout << tam_aux << endl;
               
-    switch(palavra_aux[tam_aux]){
-    case ',':
-        palavras[contador] = palavra_aux;
-        contador++;
-        palavras[contador] = ", ";
-        contador++;
-        break;
-    case '.':
-        palavras[contador] = palavra_aux;
-        contador++;
-        palavras[contador] = ". ";
-        contador++;
-        break;
-    case '!':
-        palavras[contador] = palavra_aux;
-        contador++;
-        palavras[contador] = "! ";
-        contador++;
-        break;
-    case ';':
-        palavras[contador] = palavra_aux;
-        contador++;
-        palavras[contador] = ";";
-        contador++;
-        break;
-    case ':':
-        palavras[contador] = palavra_aux;
-        contador++;
-        palavras[contador] = ":";
-        contador++;
-        break;
-    case '?':
-        palavras[contador] = palavra_aux;
-        contador++;
-        palavras[contador] = "?";
-        contador++;
-        break;
-    default:    
-        palavras[contador] = palavra_aux;
-        contador++;
-}
+        switch(palavra_aux[tam_aux]){
+            case ',':
+                palavras[contador] = palavra_aux;
+                contador++;
+                palavras[contador] = ',';
+                contador++;
+                break;
+            case '.':
+                palavras[contador] = palavra_aux;
+                contador++;
+                palavras[contador] = '.';
+                contador++;
+                break;
+            case '!':
+                palavras[contador] = palavra_aux;
+                contador++;
+                palavras[contador] = '!';
+                contador++;
+                break;
+            case ';':
+                palavras[contador] = palavra_aux;
+                contador++;
+                palavras[contador] = ';';
+                contador++;
+                break;
+            case ':':
+                palavras[contador] = palavra_aux;
+                contador++;
+                palavras[contador] = ':';
+                contador++;
+                break;
+            case '?':
+                palavras[contador] = palavra_aux;
+                contador++;
+                palavras[contador] = '?';
+                contador++;
+                break;
+            default:    
+                palavras[contador] = palavra_aux;
+                contador++;
+        }
     }
 }
 
 void cabecalho() {
-      cout << "(0" << palavras_corretas.size() << ")";
+    int tamanho = palavras_corretas.size();
+    fwrite(&tamanho, 2, 1, arq_saida);
+    //cout << "(0 " << palavras_corretas.size() << ")";
 }
 
-//-----------------------------------------------------------------------------
-//	Funcoes - Compressao e Descompressao
-//-----------------------------------------------------------------------------	
+void ler_arq_comprimido() {
+    FILE * arq = fopen("textoCOMPRIMIDO.bin", "rb");
+    fseek(arq, 0, SEEK_SET);
+    if (arq == NULL) {
+        cout << "arq_saida = Cannot open file!" << endl;
+        exit(0);
+    } else {
+        unsigned char caractere;
+        caractere = fgetc(arq);
+        while (!feof(arq)) {
+            //fscanf(arq, "%s", &palavra_orig);
+            cout << caractere << endl;
+            caractere = fgetc(arq);
+        }
+    }
+
+}
+
 void gravar_arq() {
-    int i = 0;
 
-    //fprintf(arq_saida,"%s",palavra);
-    //while(matriz_dados[50][i] !=NULL){
+    int d_palavras = 255;//delimitador de palavras
+    char d_indice = ',';//delimitador de indice
+    for (int i = 0; i < palavras_corretas.size(); i++) {
+        //PRINTA SÓ AS PALAVRAS CORRETAS
+        fwrite(&palavras_corretas[i], sizeof(palavras_corretas[i].length()), 1, arq_saida);
+        fwrite(&d_indice, 1, 1, arq_saida);
+    }
+    //cout << palavras_corretas[i] << ',';
+    int flag = 0;
+    for (int j = 0; j < palavras.size(); j++) {
+        flag = 0;
+        for (int i = 0; i < palavras_corretas.size(); i++) {
+            int tam_aux = palavras[j].length();
+			if(flag == 1) {
+				break;
+			}
+            //Printa na tela as palavras que sao menores que 3.
+            if (tam_aux <= 3 && flag == 0) {
+                flag = 1;
+                fwrite(&palavras[j], sizeof(palavras[j].length()), 1, arq_saida);
+                //cout << palavras[j];
+            }
+            //Printa na tela as palavras que sao maiores que tres, já comprimidas.
+            if (palavras_corretas[i] == palavras[j] && flag == 0) {
+                flag = 1;
+                pos = palavras_corretas.find(i);
 
-    //}
+                // convertido = pos->first *256;
+                int m = pos->first;
+                fwrite(&d_palavras, 1, 1, arq_saida);
+                fwrite(&m, 2, 1, arq_saida);
+                //cout << d_palavras << pos->first;
+            }
+        }
+    }
 }
 
 void compressao() {
@@ -177,7 +231,8 @@ void compressao() {
                 if (j > i || j == i) {
 
                     palavra_aux = palavras[i];
-
+                    
+                    // Nao alterar "-1", pois vai bugar a condicao "if (tam_aux <= 3)"
                     if (palavra_aux[tam_aux - 1] != ',' && palavra_aux[tam_aux - 1] != '.' && 
                         palavra_aux[tam_aux - 1] != '?' && palavra_aux[tam_aux - 1] != '!' &&
                         palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':') { //palavras normais
@@ -196,7 +251,6 @@ void compressao() {
                         }
                               if(existe ==0)
                                     palavras_certas[i] = palavras[j];
-						//palavras[j] = ", ";
                     }
 
                 }
@@ -218,28 +272,35 @@ void descompressao(char * argumento) {
     printf("Funcao Descompressao\n");
 }
 
-void print_testes() {
+void mostra_tela() {
+    //cabeçalho
+    cout << "(0 " << palavras_corretas.size() << ")";
+
     for (int i = 0; i < palavras_corretas.size(); i++) //PRINTA SÓ AS PALAVRAS CORRETAS
+    //Printa na tela as palavras do INDICE (RRN)
     cout << palavras_corretas[i] << ",";
     int flag = 0;
     for (int j = 0; j < palavras.size(); j++) {
         flag = 0;
         for (int i = 0; i < palavras_corretas.size(); i++) {
             int tam_aux = palavras[j].length();
-			if(flag ==1) {
+			if(flag == 1) {
 				break;
 			}
+            //Printa na tela as palavras que sao menores que 3.
             if (tam_aux <= 3 && flag == 0) {
                 flag = 1;
-                cout << "" << palavras[j];
+                cout << palavras[j];
             }
+            //Printa na tela as palavras que sao maiores que tres, já comprimidas.
             if (palavras_corretas[i] == palavras[j] && flag == 0) {
                 flag = 1;
                 pos = palavras_corretas.find(i);
-                cout << "[255 " << pos->first << "]";
+
+                // convertido = pos->first *256;
+                int m =  pos->first;
+                cout << "(255 " << m << ")";
             }
         }
     }
-
-
 }

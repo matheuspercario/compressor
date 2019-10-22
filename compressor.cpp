@@ -19,6 +19,7 @@ using namespace std;
  *			Arthur Guedes
  *			Kevin Barrios
  *			Matheus Bruder
+ *			Gabriel Velasco
  *
  */
 

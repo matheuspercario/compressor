@@ -59,7 +59,7 @@ int main(int argc, char * argv[]) {
         printf("Faltando argumentos\n");
     } else if (argv[1] == comprimir) {
         // Chamada funcao de compressao
-        abertura(argv[2], ".cmp");
+        abertura(argv[2], (char*)".cmp");
         while (!feof(arq_entrada)) {
             ler_arq();
             
@@ -72,7 +72,7 @@ int main(int argc, char * argv[]) {
         }
     } else if (argv[1] == descomprimir) {
         // Chamada funcao de descompressao
-        abertura(argv[1], "");
+        abertura(argv[1], (char*)"");
         //descompressao(argv[2]);
     } else {
         //Parametro invalido
@@ -107,50 +107,49 @@ void ler_arq() {
 		string palavra_aux = palavra_original;
         string palavra_aux1 = palavra_original;
 
-        int tam_aux = palavra_aux.size() - 1;
-        //cout << palavra_aux << endl;
-        //cout << tam_aux << endl;
-              
+        int tam_aux = palavra_aux.size();
+		//cout << "\"" << palavra_aux << "\"" << endl;
+		//cout << "tamanho:" << tam_aux << endl;
+        
+        //Caractere espaço:
+        char caractere = getc(arq_entrada);
+        
+		//cout << "Caractere: \"" << caractere << "\"" << endl;
+        
+		palavras[contador] = palavra_aux;
+		contador++;
+        
         switch(palavra_aux[tam_aux]){
             case ',':
-                palavras[contador] = palavra_aux;
-                contador++;
                 palavras[contador] = ',';
                 contador++;
                 break;
             case '.':
-                palavras[contador] = palavra_aux;
-                contador++;
                 palavras[contador] = '.';
                 contador++;
                 break;
             case '!':
-                palavras[contador] = palavra_aux;
-                contador++;
                 palavras[contador] = '!';
                 contador++;
                 break;
             case ';':
-                palavras[contador] = palavra_aux;
-                contador++;
                 palavras[contador] = ';';
                 contador++;
                 break;
             case ':':
-                palavras[contador] = palavra_aux;
-                contador++;
                 palavras[contador] = ':';
                 contador++;
                 break;
             case '?':
-                palavras[contador] = palavra_aux;
-                contador++;
                 palavras[contador] = '?';
                 contador++;
                 break;
-            default:    
-                palavras[contador] = palavra_aux;
-                contador++;
+            default:
+				if(caractere == ' ') {
+					palavras[contador] = ' ';
+				}
+				contador++;
+				break;
         }
     }
 }

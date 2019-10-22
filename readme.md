@@ -9,10 +9,15 @@ Por exemplo: Ao invés de escrever a palavra "Novembro", escreve-se "11".
 
 ### Motivação 
    Tal projeto é responsável por compor parte da nota da disciplina ST562 - Estrutura de Arquivos - da Faculdade de Tecnologia da Unicamp de Limeira. 2/2019
-   
+
+### Tutorial
+   Execute o arquivo via cmd ou similar com os comandos:
+   - Comprimir: ".\executavel.exe "-c" arquivodetexto.txt";
+   - Descomprimir: ".\executavel.exe "-d" arquivodetexto.txt"
    
 ### Desenvolvedores:
 	
  	- Arthur Guedes
  	- Kevin Barrios
  	- Matheus Bruder
+	- Gabriel Velasco

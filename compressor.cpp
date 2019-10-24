@@ -32,13 +32,18 @@ map < int, string > ::iterator pos;
 
 int contador = 0;
 int existe = 0;
+
+
+ofstream f_out("texto.txt.cmp");
+
+
 //-----------------------------------------------------------------------------
 //	Prototipo das Funcoes
 //-----------------------------------------------------------------------------
 
 void compressao();
 void descompressao(char * argumento);
-void abertura(char * argumento, char * action);
+void abertura(char * argumento);
 void ler_arq();
 void gravar_arq();
 void cabecalho();
@@ -60,20 +65,19 @@ int main(int argc, char * argv[]) {
         printf("Faltando argumentos\n");
     } else if (argv[1] == comprimir) {
         // Chamada funcao de compressao
-        abertura(argv[2], (char*)".cmp");
+        abertura(argv[2]);
         while (!feof(arq_entrada)) {
             ler_arq();
-            
             compressao();
 			cabecalho(); //JA IMPRIME
             gravar_arq();
             mostra_tela();
 
-            ler_arq_comprimido();
+            //ler_arq_comprimido();
         }
     } else if (argv[1] == descomprimir) {
         // Chamada funcao de descompressao
-        abertura(argv[1], (char*)"");
+        abertura(argv[1]);
         //descompressao(argv[2]);
     } else {
         //Parametro invalido
@@ -85,108 +89,93 @@ int main(int argc, char * argv[]) {
 //-----------------------------------------------------------------------------
 //	Funcoes - Compressao e Descompressao  (Prontas)
 //-----------------------------------------------------------------------------	
-void abertura(char * argumento, char * action) {
+void abertura(char * argumento) {
     arq_entrada = fopen(argumento, "r");
     if (arq_entrada == NULL) {
         cout << "arq_entrada = Cannot open file!" << endl;
         exit(0);
     }
-    //strcat(argumento, action);
-    arq_saida = fopen("textoCOMPRIMIDO.bin", "wb");
+    
+    /*arq_saida = fopen("texto.txt.cmp", "w+");
     if (arq_saida == NULL) {
         cout << "arq_saida = Cannot open file!" << endl;
         exit(0);
-    }
+    }*/
+   
 }
 
 void ler_arq() {
-    char palavra_original[50];
+    char palavra_original[64];
     int tam_aux1 = 0;
+    char caractere;
     
     while ((tam_aux1 < 4096) && (!feof(arq_entrada))) {
-        fscanf(arq_entrada, "%s", &palavra_original);
+        fscanf(arq_entrada, "%64[^,.!;:? ]s", &palavra_original);
 		string palavra_aux = palavra_original;
-        string palavra_aux1 = palavra_original;
-
-        int tam_aux = palavra_aux.size();
-		//cout << "\"" << palavra_aux << "\"" << endl;
-		//cout << "tamanho:" << tam_aux << endl;
-        
-        //Caractere espaço:
-        char caractere = getc(arq_entrada);
-        
-		//cout << "Caractere: \"" << caractere << "\"" << endl;
-        
+		
+		caractere = getc(arq_entrada);
+		//cout << "\"" << palavra_aux << "\"" << " | " << "\"" << caractere << "\"" << endl;
+		
 		palavras[contador] = palavra_aux;
 		contador++;
         
-        switch(palavra_aux[tam_aux]){
+        switch(caractere){
             case ',':
                 palavras[contador] = ',';
-                contador++;
                 break;
             case '.':
                 palavras[contador] = '.';
-                contador++;
                 break;
             case '!':
                 palavras[contador] = '!';
-                contador++;
                 break;
             case ';':
                 palavras[contador] = ';';
-                contador++;
                 break;
             case ':':
                 palavras[contador] = ':';
-                contador++;
                 break;
             case '?':
                 palavras[contador] = '?';
-                contador++;
+                break;
+            case ' ':
+                palavras[contador] = ' ';
                 break;
             default:
-				if(caractere == ' ') {
-					palavras[contador] = ' ';
-				}
-				contador++;
 				break;
         }
+        
+		contador++;
+		
+		caractere = getc(arq_entrada);
+	
+		while(caractere == ',' || caractere == '.' || caractere == '!' || caractere == ';' || caractere == ':' || caractere == '?' || caractere == ' ') {
+			palavras[contador] = caractere;
+			contador++;
+			caractere = getc(arq_entrada);
+		}
+		
+		ungetc(caractere, arq_entrada);
     }
 }
 
 void cabecalho() {
     int tamanho = palavras_corretas.size();
-    fwrite(&tamanho, 2, 1, arq_saida);
-    //cout << "(0 " << palavras_corretas.size() << ")";
+    char tamanho_char = char(tamanho);
+    //fwrite(&tamanho_char, sizeof(char), 1, arq_saida);
 }
 
-void ler_arq_comprimido() {
-    FILE * arq = fopen("textoCOMPRIMIDO.bin", "rb");
-    fseek(arq, 0, SEEK_SET);
-    if (arq == NULL) {
-        cout << "arq_saida = Cannot open file!" << endl;
-        exit(0);
-    } else {
-        unsigned char caractere;
-        caractere = fgetc(arq);
-        while (!feof(arq)) {
-            //fscanf(arq, "%s", &palavra_orig);
-            cout << caractere << endl;
-            caractere = fgetc(arq);
-        }
-    }
-
-}
-
-void gravar_arq() {
-
-    int d_palavras = 255;//delimitador de palavras
+void gravar_arq() {  
+    char d_palavras = char (255);//delimitador de palavras
     char d_indice = ',';//delimitador de indice
     for (int i = 0; i < palavras_corretas.size(); i++) {
         //PRINTA SÓ AS PALAVRAS CORRETAS
-        fwrite(&palavras_corretas[i], sizeof(palavras_corretas[i].length()), 1, arq_saida);
-        fwrite(&d_indice, 1, 1, arq_saida);
+        //cout << "\n" << "\n" << "\n" << "\n" << palavras_corretas[i] << "\n" << "\n" << "\n" << "\n" << endl;
+        //fwrite(&palavras_corretas[i], 1, sizeof(palavras_corretas[i]), arq_saida);
+        //fwrite(&d_indice, 1, 1, arq_saida);
+        
+        //printf("%c\n", palavras_corretas[i]);
+        f_out << palavras_corretas[i] << d_indice << endl;
     }
     //cout << palavras_corretas[i] << ',';
     int flag = 0;
@@ -200,7 +189,7 @@ void gravar_arq() {
             //Printa na tela as palavras que sao menores que 3.
             if (tam_aux <= 3 && flag == 0) {
                 flag = 1;
-                fwrite(&palavras[j], sizeof(palavras[j].length()), 1, arq_saida);
+                //fwrite(&palavras[j], sizeof(palavras[j].length()), 1, arq_saida);
                 //cout << palavras[j];
             }
             //Printa na tela as palavras que sao maiores que tres, já comprimidas.
@@ -210,8 +199,9 @@ void gravar_arq() {
 
                 // convertido = pos->first *256;
                 int m = pos->first;
-                fwrite(&d_palavras, 1, 1, arq_saida);
-                fwrite(&m, 2, 1, arq_saida);
+                char var = char(m);
+                //fwrite(&d_palavras, 1, 1, arq_saida);
+                //fwrite(&var, 2, 1, arq_saida);
                 //cout << d_palavras << pos->first;
             }
         }

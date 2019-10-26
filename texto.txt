@@ -1,1 +1,1 @@
-Joao,
+Joao comprou laranja e banana, mas Pedro comprou apenas laranja.

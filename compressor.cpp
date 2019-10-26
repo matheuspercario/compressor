@@ -23,8 +23,12 @@ using namespace std;
  *
  */
 
+//-----------------------------------------------------------------------------
+//	Variavéis Globais
+//-----------------------------------------------------------------------------
 FILE * arq_entrada;
 FILE * arq_saida;
+ofstream fout;
 
 map < int, string > palavras;
 map < int, string > palavras_certas;
@@ -34,20 +38,16 @@ map < int, string > ::iterator pos;
 int contador = 0;
 int existe = 0;
 
-// Abertura dos arquivos
-ofstream fout;
-
-
 //-----------------------------------------------------------------------------
 //	Prototipo das Funcoes
 //-----------------------------------------------------------------------------
 
 void compressao();
-void descompressao(char * argumento);
+void descompressao();
 void abertura(char * argumento);
 void ler_arq();
-void gravar_arq();
-void cabecalho();
+void gravar_arq(char * argumento);
+void cabecalho(char * argumento);
 void mostra_tela();
 
 
@@ -69,9 +69,9 @@ int main(int argc, char * argv[]) {
         while (!feof(arq_entrada)) {
             ler_arq();
             compressao();
-			cabecalho(); //JA IMPRIME
-            gravar_arq();
-            mostra_tela();
+			cabecalho(argv[2]); 
+            gravar_arq(argv[2]);
+            //mostra_tela();
         }
     } else if (argv[1] == descomprimir) {
         // Chamada funcao de descompressao
@@ -96,74 +96,56 @@ void abertura(char * argumento) {
 }
 
 void ler_arq() {
-    char palavra_original[50];
+    char palavra_original[64];
     int tam_aux1 = 0;
+    char caractere;
     
     while ((tam_aux1 < 4096) && (!feof(arq_entrada))) {
-        fscanf(arq_entrada, "%s", &palavra_original);
+        fscanf(arq_entrada, "%64[^,.!;:? ]s", &palavra_original);
 		string palavra_aux = palavra_original;
-        string palavra_aux1 = palavra_original;
-
-        int tam_aux = palavra_aux.size() - 1;
-        
-        //Caractere espaço:
-        char caractere = getc(arq_entrada);
-        
-		//cout << "Caractere: \"" << caractere << "\"" << endl;
-        
+		
+		caractere = getc(arq_entrada);
+		
 		palavras[contador] = palavra_aux;
 		contador++;
         
-        if(palavra_aux.size() > 3) {
-            switch(palavra_aux[tam_aux]){
+        switch(caractere){
             case ',':
                 palavras[contador] = ',';
-                contador++;
-				palavras[contador] = ' ';
-				contador++;
                 break;
             case '.':
                 palavras[contador] = '.';
-                contador++;
-                palavras[contador] = ' ';
-				contador++;
                 break;
             case '!':
                 palavras[contador] = '!';
-                contador++;
-                palavras[contador] = ' ';
-				contador++;
                 break;
             case ';':
                 palavras[contador] = ';';
-                contador++;
-                palavras[contador] = ' ';
-				contador++;
                 break;
             case ':':
                 palavras[contador] = ':';
-                contador++;
-                palavras[contador] = ' ';
-				contador++;
                 break;
             case '?':
                 palavras[contador] = '?';
-                contador++;
+                break;
+            case ' ':
                 palavras[contador] = ' ';
-				contador++;
                 break;
             default:
-				if(caractere == ' ') {
-					palavras[contador] = ' ';
-				}
-				contador++;
 				break;
-            }
-        } else {
-            palavras[contador] = ' ';
-			contador++;
         }
         
+		contador++;
+		
+		caractere = getc(arq_entrada);
+	
+		while(caractere == ',' || caractere == '.' || caractere == '!' || caractere == ';' || caractere == ':' || caractere == '?' || caractere == ' ') {
+			palavras[contador] = caractere;
+			contador++;
+			caractere = getc(arq_entrada);
+		}
+		
+		ungetc(caractere, arq_entrada);
     }
 }
 
@@ -217,35 +199,28 @@ void compressao() {
     }
 }
 
-void cabecalho() {
-    //arq_saida = fopen("texto.txt.cmp", "w");
-    //if(arq_saida == NULL) {
-    //    cout << "arq_saida NULL!" << endl;
-    //}
-    //fwrite(&tamanho, 2, 1, arq_saida);
-    //fclose(arq_saida);
-
-    int tamanho = palavras_corretas.size();
-    char tamanho_char = char(tamanho);
-
-    arq_saida = fopen("texto.txt.cmp", "w");
-    fwrite(&tamanho, 2, 1, arq_saida);
+void cabecalho(char * argumento) {
+    strcat(argumento, ".cmp");
+    short int tamanho = palavras_corretas.size();
+    arq_saida = fopen(argumento, "w");
+    unsigned char bytemais = ((tamanho >> 8) & 255); // byte mais significativo
+    unsigned char bytemenos = (tamanho & 255); // byte mais significativo
+    fprintf(arq_saida, "%c", bytemais);
+    fprintf(arq_saida, "%c", bytemenos);
     fclose(arq_saida);
-}
 
-void gravar_arq() {  
-    
-    char d_palavras = char (255); //delimitador de palavras
-    char byte_mais_significativo = char(0); //byte mais significativo
-    char byte_menos_significativo; //byte menos significativo
     char d_indice = ','; //delimitador de indice
-
     for (int i = 0; i < palavras_corretas.size(); i++) {
         //PRINTA SÓ AS PALAVRAS CORRETAS+
-        fout.open("texto.txt.cmp", ofstream::app);
+        fout.open(argumento, ofstream::app);
         fout << palavras_corretas[i] << d_indice;
         fout.close();
     }
+}
+
+void gravar_arq(char * argumento) {  
+    char d_palavras = char (255); //delimitador de palavras
+    
     int flag = 0;
     for (int j = 0; j < palavras.size(); j++) {
         flag = 0;
@@ -257,7 +232,7 @@ void gravar_arq() {
             //Printa na tela as palavras que sao menores que 3.
             if (tam_aux <= 3 && flag == 0) {
                 flag = 1;
-                fout.open("texto.txt.cmp",ofstream::app);
+                fout.open(argumento, ofstream::app);
                 fout << palavras[j];
                 fout.close();
             }
@@ -265,25 +240,25 @@ void gravar_arq() {
             if (palavras_corretas[i] == palavras[j] && flag == 0) {
                 flag = 1;
                 pos = palavras_corretas.find(i);
-                int m = pos->first;
+                short int bytepalavra = pos->first;
 
-                arq_saida = fopen("texto.txt.cmp", "a");
-                fwrite(&d_palavras, 1, 1, arq_saida);
-                fwrite(&m, 2, 1, arq_saida);
+                arq_saida = fopen(argumento, "a");
+                fwrite(&d_palavras, 1, 1, arq_saida); //byte sinalizador de palavras
+
+                unsigned char bytemais = ((bytepalavra >> 8) & 255); // byte mais significativo
+                unsigned char bytemenos = (bytepalavra & 255); // byte mais significativo
+                fprintf(arq_saida, "%c", bytemais);
+                fprintf(arq_saida, "%c", bytemenos);
                 fclose(arq_saida);
             }
         }
     }
 }
 
-
-
 void descompressao(char * argumento) {
     printf("%s\n", argumento);
-    printf("Funcao Descompressao\n");
+    printf("Caso de uso 2 não implementado!\n");
 }
-
-
 
 //-----------------------------------------------------------------------------
 //	Funcao Auxiliar

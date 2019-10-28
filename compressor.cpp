@@ -43,7 +43,7 @@ int existe = 0;
 //-----------------------------------------------------------------------------
 
 void compressao();
-void descompressao();
+void descompressao(char * argumento);
 void abertura(char * argumento);
 void ler_arq();
 void gravar_arq(char * argumento);
@@ -77,7 +77,7 @@ int main(int argc, char * argv[]) {
         // Chamada funcao de descompressao
         abertura(argv[2]);
         if (!feof(arq_entrada)) {
-            descompressao();
+            descompressao(argv[2]);
         }
     } else {
         //Parametro invalido
@@ -258,8 +258,16 @@ void gravar_arq(char * argumento) {
     }
 }
 
-void descompressao() {
-    arq_saida = fopen("descomprimido.txt", "w+");
+void descompressao(char * argumento) {
+    string meuArquivoStr = argumento;
+    meuArquivoStr = meuArquivoStr.substr(0, meuArquivoStr.size()-4);
+
+    char meuArquivo[meuArquivoStr.size() + 1];
+
+    copy(meuArquivoStr.begin(), meuArquivoStr.end(), meuArquivo);
+    meuArquivo[meuArquivoStr.size()] = '\0';
+
+    arq_saida = fopen(meuArquivo, "w");
 
     int aux = 1;
     int numeroPalavras = 0;
@@ -268,12 +276,9 @@ void descompressao() {
     // 1. LEITURA CABEÇALHO
     fscanf(arq_entrada, "%c", &aux);
     numeroPalavras = 255*aux;
-    cout << "aux: " << aux << endl;
 
     fscanf(arq_entrada, "%c", &aux);
     numeroPalavras += aux;
-    cout << "aux: " << aux << endl;
-    cout << "numPalavras: " << numeroPalavras << endl;
 
 
     // 2. LEITURA PALAVRAS DO CABEÇALHO
@@ -281,7 +286,6 @@ void descompressao() {
         fscanf(arq_entrada, "%[^,]s", &palavra_original);
         string palavraAux = palavra_original;
         palavras[i] = palavraAux;
-        cout << "palavra cabecalho: " << palavras[i] << endl;
 		getc(arq_entrada);
     }
 
@@ -289,13 +293,9 @@ void descompressao() {
     while(!feof(arq_entrada)) {
         fscanf(arq_entrada, "%c", &aux);
 
-        cout << "auxMain: " << aux << endl;
-
-        fout.open("descomprimido.txt", ofstream::app);
+        fout.open(meuArquivo, ofstream::app);
 
         if(aux == 255) {
-            cout << "======== AUX == 255 ========" << endl;
-
             fscanf(arq_entrada, "%c", &aux);
             numeroPalavras = 255*aux;
             fscanf(arq_entrada, "%c", &aux);
@@ -303,20 +303,13 @@ void descompressao() {
             pos = palavras.find(aux);
             string palavraAux = pos->second;
 
-            cout << "aux255: " << aux << endl;
-            cout << "palavra cabecalho: " << palavraAux << endl;
-            cout << "palavraAux: " << palavraAux << endl;
-
             fout << palavraAux;
-            //fprintf(arq_saida, "%s", palavraAux);
         }
 
         else if(aux > 32) {
-            cout << "======== AUX > 32 ========" << endl;
             char auxChar = aux;
 
             while(aux != 255 && aux > 32 && (!feof(arq_entrada))) {
-                cout << "auxChar: " << auxChar << endl;
                 fout << auxChar;
                 fscanf(arq_entrada, "%c", &auxChar);
                 aux = auxChar;
@@ -324,17 +317,11 @@ void descompressao() {
 
             if(!feof(arq_entrada))
                 ungetc(aux, arq_entrada);
-
-            //fprintf(arq_saida, "%s", palavraAux);
         }
 
         else {
-            cout << "======== AUX <= 32 ========" << endl;
-            cout << "Espaco: " << aux << endl;
-
             char espaco = aux;
             fout << espaco;
-            //fputc(aux, arq_saida);
         }
 
         fout.close();

@@ -69,14 +69,16 @@ int main(int argc, char * argv[]) {
         while (!feof(arq_entrada)) {
             ler_arq();
             compressao();
-			cabecalho(argv[2]); 
+			cabecalho(argv[2]);
             gravar_arq(argv[2]);
             //mostra_tela();
         }
     } else if (argv[1] == descomprimir) {
         // Chamada funcao de descompressao
-        abertura(argv[1]);
-        //descompressao(argv[2]);
+        abertura(argv[2]);
+        if (!feof(arq_entrada)) {
+            descompressao();
+        }
     } else {
         //Parametro invalido
         printf("Argumento invalido!\n");
@@ -86,29 +88,30 @@ int main(int argc, char * argv[]) {
 
 //-----------------------------------------------------------------------------
 //	Funcoes - Compressao e Descompressao  (Prontas)
-//-----------------------------------------------------------------------------	
+//-----------------------------------------------------------------------------
 void abertura(char * argumento) {
-    arq_entrada = fopen(argumento, "r");
+    arq_entrada = fopen(argumento, "rb");
+
     if (arq_entrada == NULL) {
         cout << "arq_entrada = Cannot open file!" << endl;
         exit(0);
-    }  
+    }
 }
 
 void ler_arq() {
     char palavra_original[64];
     int tam_aux1 = 0;
     char caractere;
-    
+
     while ((tam_aux1 < 4096) && (!feof(arq_entrada))) {
         fscanf(arq_entrada, "%64[^,.!;:? ]s", &palavra_original);
 		string palavra_aux = palavra_original;
-		
+
 		caractere = getc(arq_entrada);
-		
+
 		palavras[contador] = palavra_aux;
 		contador++;
-        
+
         switch(caractere){
             case ',':
                 palavras[contador] = ',';
@@ -134,17 +137,17 @@ void ler_arq() {
             default:
 				break;
         }
-        
+
 		contador++;
-		
+
 		caractere = getc(arq_entrada);
-	
+
 		while(caractere == ',' || caractere == '.' || caractere == '!' || caractere == ';' || caractere == ':' || caractere == '?' || caractere == ' ') {
 			palavras[contador] = caractere;
 			contador++;
 			caractere = getc(arq_entrada);
 		}
-		
+
 		ungetc(caractere, arq_entrada);
     }
 }
@@ -162,9 +165,9 @@ void compressao() {
                 if (j > i || j == i) {
 
                     palavra_aux = palavras[i];
-                    
+
                     // Nao alterar "-1", pois vai bugar a condicao "if (tam_aux <= 3)"
-                    if (palavra_aux[tam_aux - 1] != ',' && palavra_aux[tam_aux - 1] != '.' && 
+                    if (palavra_aux[tam_aux - 1] != ',' && palavra_aux[tam_aux - 1] != '.' &&
                         palavra_aux[tam_aux - 1] != '?' && palavra_aux[tam_aux - 1] != '!' &&
                         palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':') { //palavras normais
 
@@ -175,7 +178,7 @@ void compressao() {
                         for (k = 0; k < tam_aux - 1; k++) {
                             palavras[j] += palavra_aux[k];
                         }
-                        
+
                         for(int k =0; k<palavras_certas.size(); k++){
                             if(palavras_certas[k] == palavras[j])
                                 existe=1;
@@ -218,9 +221,9 @@ void cabecalho(char * argumento) {
     }
 }
 
-void gravar_arq(char * argumento) {  
+void gravar_arq(char * argumento) {
     char d_palavras = char (255); //delimitador de palavras
-    
+
     int flag = 0;
     for (int j = 0; j < palavras.size(); j++) {
         flag = 0;
@@ -255,9 +258,91 @@ void gravar_arq(char * argumento) {
     }
 }
 
-void descompressao(char * argumento) {
-    printf("%s\n", argumento);
-    printf("Caso de uso 2 não implementado!\n");
+void descompressao() {
+    arq_saida = fopen("descomprimido.txt", "w+");
+
+    int aux = 1;
+    int numeroPalavras = 0;
+    char palavra_original[64];
+
+    // 1. LEITURA CABEÇALHO
+    fscanf(arq_entrada, "%c", &aux);
+    numeroPalavras = 255*aux;
+    cout << "aux: " << aux << endl;
+
+    fscanf(arq_entrada, "%c", &aux);
+    numeroPalavras += aux;
+    cout << "aux: " << aux << endl;
+    cout << "numPalavras: " << numeroPalavras << endl;
+
+
+    // 2. LEITURA PALAVRAS DO CABEÇALHO
+    for(int i=0; i<numeroPalavras; i++) {
+        fscanf(arq_entrada, "%[^,]s", &palavra_original);
+        string palavraAux = palavra_original;
+        palavras[i] = palavraAux;
+        cout << "palavra cabecalho: " << palavras[i] << endl;
+		getc(arq_entrada);
+    }
+
+    // 3. ESCREVER NO ARQUIVO
+    while(!feof(arq_entrada)) {
+        fscanf(arq_entrada, "%c", &aux);
+
+        cout << "auxMain: " << aux << endl;
+
+        fout.open("descomprimido.txt", ofstream::app);
+
+        if(aux == 255) {
+            cout << "======== AUX == 255 ========" << endl;
+
+            fscanf(arq_entrada, "%c", &aux);
+            numeroPalavras = 255*aux;
+            fscanf(arq_entrada, "%c", &aux);
+            numeroPalavras += aux;
+            pos = palavras.find(aux);
+            string palavraAux = pos->second;
+
+            cout << "aux255: " << aux << endl;
+            cout << "palavra cabecalho: " << palavraAux << endl;
+            cout << "palavraAux: " << palavraAux << endl;
+
+            fout << palavraAux;
+            //fprintf(arq_saida, "%s", palavraAux);
+        }
+
+        else if(aux > 32) {
+            cout << "======== AUX > 32 ========" << endl;
+            char auxChar = aux;
+
+            while(aux != 255 && aux > 32 && (!feof(arq_entrada))) {
+                cout << "auxChar: " << auxChar << endl;
+                fout << auxChar;
+                fscanf(arq_entrada, "%c", &auxChar);
+                aux = auxChar;
+            }
+
+            if(!feof(arq_entrada))
+                ungetc(aux, arq_entrada);
+
+            //fprintf(arq_saida, "%s", palavraAux);
+        }
+
+        else {
+            cout << "======== AUX <= 32 ========" << endl;
+            cout << "Espaco: " << aux << endl;
+
+            char espaco = aux;
+            fout << espaco;
+            //fputc(aux, arq_saida);
+        }
+
+        fout.close();
+    }
+    fclose(arq_saida);
+    fclose(arq_entrada);
+
+    return;
 }
 
 //-----------------------------------------------------------------------------

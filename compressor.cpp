@@ -169,7 +169,8 @@ void compressao() {
                     // Nao alterar "-1", pois vai bugar a condicao "if (tam_aux <= 3)"
                     if (palavra_aux[tam_aux - 1] != ',' && palavra_aux[tam_aux - 1] != '.' &&
                         palavra_aux[tam_aux - 1] != '?' && palavra_aux[tam_aux - 1] != '!' &&
-                        palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':') { //palavras normais
+                        palavra_aux[tam_aux - 1] != ';' && palavra_aux[tam_aux - 1] != ':' &&
+                        palavra_aux[tam_aux - 1] != ' ') { //palavras normais
 
                             palavras_certas[i] = palavras[j];
 
@@ -259,9 +260,10 @@ void gravar_arq(char * argumento) {
 }
 
 void descompressao(char * argumento) {
+    // "texto.txt.cmp" -> "texto.txt"
     string meuArquivoStr = argumento;
-    meuArquivoStr = meuArquivoStr.substr(0, meuArquivoStr.size()-4);
 
+    meuArquivoStr = meuArquivoStr.substr(0, meuArquivoStr.size()-4);
     char meuArquivo[meuArquivoStr.size() + 1];
 
     copy(meuArquivoStr.begin(), meuArquivoStr.end(), meuArquivo);
@@ -271,37 +273,34 @@ void descompressao(char * argumento) {
 
     int aux = 1;
     int numeroPalavras = 0;
-    char palavra_original[64];
 
     // 1. LEITURA CABEÇALHO
-    fscanf(arq_entrada, "%c", &aux);
-    numeroPalavras = 255*aux;
-
-    fscanf(arq_entrada, "%c", &aux);
+    aux = fgetc(arq_entrada);
+    numeroPalavras = 256*aux;
+    aux = fgetc(arq_entrada);
     numeroPalavras += aux;
-
 
     // 2. LEITURA PALAVRAS DO CABEÇALHO
     for(int i=0; i<numeroPalavras; i++) {
+        char palavra_original[64];
         fscanf(arq_entrada, "%[^,]s", &palavra_original);
         string palavraAux = palavra_original;
         palavras[i] = palavraAux;
-		getc(arq_entrada);
+		fgetc(arq_entrada);
     }
 
     // 3. ESCREVER NO ARQUIVO
     while(!feof(arq_entrada)) {
-        fscanf(arq_entrada, "%c", &aux);
+        aux = fgetc(arq_entrada);
 
         fout.open(meuArquivo, ofstream::app);
 
         if(aux == 255) {
-            fscanf(arq_entrada, "%c", &aux);
-            numeroPalavras = 255*aux;
-            fscanf(arq_entrada, "%c", &aux);
+            aux = fgetc(arq_entrada);
+            numeroPalavras = 256*aux;
+            aux = fgetc(arq_entrada);
             numeroPalavras += aux;
-            pos = palavras.find(aux);
-            string palavraAux = pos->second;
+            string palavraAux = palavras[aux];
 
             fout << palavraAux;
         }
@@ -309,9 +308,9 @@ void descompressao(char * argumento) {
         else if(aux > 32) {
             char auxChar = aux;
 
-            while(aux != 255 && aux > 32 && (!feof(arq_entrada))) {
+            while(aux > 32 && aux < 255) {
                 fout << auxChar;
-                fscanf(arq_entrada, "%c", &auxChar);
+                auxChar = fgetc(arq_entrada);
                 aux = auxChar;
             }
 
@@ -319,13 +318,13 @@ void descompressao(char * argumento) {
                 ungetc(aux, arq_entrada);
         }
 
-        else {
-            char espaco = aux;
-            fout << espaco;
+        else if(aux == 32) {
+            fout << " ";
         }
 
         fout.close();
     }
+
     fclose(arq_saida);
     fclose(arq_entrada);
 
